@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>HomePage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'home.css' %}?v={{ STATIC_VERSION }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="ocr">
+        <form onsubmit="return validateImage()" action="{% url 'extract_text' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h1>ViciOCR</h1>
+            
+            <p><b>Enter your details:</b></p>
+            <input type="text" id="visitor_name" name="visitor_name" placeholder="Name" required class="styled-input"><br>
+            <label for="date_of_visiting">Date of Visiting:</label>
+            <input type="date" id="date_of_visiting" name="date_of_visiting" placeholder="Date of Visiting" required class="styled-input"><br><br>
+            <input type="text" id="duration_of_visiting" name="duration_of_visiting" placeholder="Duration of Visiting" required class="styled-input"><br><br>
+            
+            <p><b>Select the type of card you want to upload</b></p>
+            <div class="radio-group">
+                <input type="radio" name="Card" id="Aadhar" value="Aadhar" required>
+                <label for="Aadhar">Aadhaar card</label>
+                <input type="radio" name="Card" id="Pan" value="Pan" required>
+                <label for="Pan">Pan card</label>
+            </div><br>
+            
+            <p><b>Upload the image to extract details</b></p>
+            <input class="file-input" type="file" id="Image" name="Image" required>
+            <label class="file-label" for="Image">Choose File</label>
+            <span class="file-name" id="file-name">No file chosen</span><br><br>
+            <button type="submit" class="button">
+                <span class="button-text">Create Visitor Pass</span>
+                <div class="fill-container"></div>
+            </button>
+        </form>
+    </div>
+    <script>
+        function validateImage() {
+            const fileInput = document.getElementById('Image');
+            const filePath = fileInput.value;
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+            if (!allowedExtensions.exec(filePath)) {
+                alert('Please upload file having extensions .jpeg/.jpg/.png/.gif only.');
+                fileInput.value = '';
+                return false;
+            }
+            return true;
+        }
+
+        document.getElementById('Image').addEventListener('change', function () {
+            const fileInput = document.getElementById('Image');
+            const fileNameSpan = document.getElementById('file-name');
+            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : 'No file chosen';
+            fileNameSpan.textContent = fileName;
+        });
+    </script>
+</body>
+
+</html>
