@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>UploadPage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e8eaf6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: linear-gradient(135deg, #ffffff, #b7b5b529);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            background: linear-gradient(135deg, #a6cdf457, #91b9dc);
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-radius: 20px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .styled-input,
+        .duration {
+            width: 80%;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1px solid #00000034;
+            margin-top: 5px;
+        }
+
+        .styled-input {
+            width: calc(84% - 22px);
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px;
+            margin-top: 0;
+            margin-bottom: 2px;
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .button-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            color: #2c3e50
+        }
+
+        button,
+        .custom-file-upload {
+            width: 60%;
+            position: relative;
+            padding: 10px 50px;
+            border-radius: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #2c3e50;
+            border: solid 1px #5198bb;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 1.1rem;
+            margin-top: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        button .button-text,
+        .custom-file-upload .button-text {
+            position: relative;
+            z-index: 2;
+        }
+
+        button .fill-container,
+        .custom-file-upload .fill-container {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            padding-bottom: 100%;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        button .fill-container::after,
+        .custom-file-upload .fill-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #63c0ee;
+            border-radius: 50%;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(-100%);
+        }
+
+        button:hover,
+        .custom-file-upload:hover {
+            border-color: #63c0ee;
+        }
+
+        button:hover .fill-container,
+        .custom-file-upload:hover .fill-container {
+            transform: translateY(-50%) rotate(0);
+        }
+
+        button:hover .fill-container::after,
+        .custom-file-upload:hover .fill-container::after {
+            transform: translateY(0);
+        }
+
+        .items {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            width: 40%;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .input-group input[type="radio"] {
+            margin: 0 5px;
+        }
+
+        .input-group input[type="file"] {
+            display: none;
+        }
+
+        .radio-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .radio-group label {
+            margin-right: 15px;
+            font-size: 15px;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form onsubmit="return validateImage()" method="POST" enctype="multipart/form-data" action="{% url 'extract_text' %}">
+            {% csrf_token %}
+            <div class="header">
+                <h2>Create Visitor Pass</h2>
+            </div>
+
+            <div class="items">
+                <input type="text" id="visitor_name" name="visitor_name" placeholder="Name" required class="styled-input">
+                <div class="input-group">
+                    <label for="date_of_visiting">
+                        <p><b>Date and Time of Visiting</b></p>
+                    </label>
+                    <input type="datetime-local" id="date_of_visiting" name="date_of_visiting" placeholder="Date of Visiting" required class="duration">
+                    <input type="text" id="duration_of_visiting" name="duration_of_visiting" placeholder="Duration of Visiting" required class="duration">
+                </div>
+                <p><b>Select the type of card you want to upload</b></p>
+                <div class="radio-group">
+                    <input type="radio" name="Card" id="Aadhar" value="Aadhar" required>
+                    <label for="Aadhar">Aadhaar card</label>
+                    <input type="radio" name="Card" id="Pan" value="Pan" required>
+                    <label for="Pan">Pan card</label>
+                </div>
+                <p><b>Upload the image to extract details</b></p>
+                <div class="input-group">
+                    <label for="Image" class="custom-file-upload">
+                        <span class="button-text">Choose File</span>
+                        <div class="fill-container"></div>
+                    </label>
+                    <input type="file" id="Image" name="image" required onchange="displayFileName()">
+                    <p id="fileName" style="margin-top: 10px; font-weight: bold;"></p>
+                </div>
+                <button type="submit">
+                    <span class="button-text">Upload</span>
+                    <div class="fill-container"></div>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% load static %}
+    <script>
+        function validateImage() {
+            const fileInput = document.getElementById('Image');
+            const filePath = fileInput.value;
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+            if (!allowedExtensions.exec(filePath)) {
+                alert('Please upload file having extensions .jpeg/.jpg/.png/.gif only.');
+                fileInput.value = '';
+                return false;
+            } else {
+                if (fileInput.files && fileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.getElementById('imagePreview').innerHTML = '<img src="' + e.target.result + '" width="200" />';
+                    };
+                    reader.readAsDataURL(fileInput.files[0]);
+                }
+            }
+            return true;
+        }
+
+        function displayFileName() {
+            const fileInput = document.getElementById('Image');
+            const fileName = fileInput.files[0].name;
+            document.getElementById('fileName').textContent = fileName;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>UploadQR</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e8eaf6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: linear-gradient(135deg, #ffffff, #b7b5b529);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding-bottom: 20px;
+            text-align: center;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            background: linear-gradient(135deg, #a6cdf457, #91b9dc);
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-radius: 20px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        form {
+            font-family: sans-serif;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        label {
+            width: 50%;
+            position: relative;
+            padding: 10px 50px;
+            border-radius: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #2c3e50;
+            border: solid 1px #5198bb;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 1.1rem;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        label .button-text {
+            position: relative;
+            z-index: 2;
+        }
+
+        label .fill-container {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            padding-bottom: 100%;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        label .fill-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #63c0ee;
+            border-radius: 50%;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(-100%);
+        }
+
+        label:hover {
+            border-color: #63c0ee;
+        }
+
+        label:hover .fill-container {
+            transform: translateY(-50%) rotate(0);
+        }
+
+        label:hover .fill-container::after {
+            transform: translateY(0);
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+
+        button {
+            width: 70%;
+            position: relative;
+            padding: 10px 50px;
+            border-radius: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #2c3e50;
+            border: solid 1px #5198bb;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 1.1rem;
+            margin-top: 0;
+        }
+
+        button .button-text {
+            position: relative;
+            z-index: 2;
+        }
+
+        button .fill-container {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            padding-bottom: 100%;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        button .fill-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #63c0ee;
+            border-radius: 50%;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(-100%);
+        }
+
+        button:hover {
+            border-color: #63c0ee;
+        }
+
+        button:hover .fill-container {
+            transform: translateY(-50%) rotate(0);
+        }
+
+        button:hover .fill-container::after {
+            transform: translateY(0);
+        }
+
+        .active{
+            color: #0b8043;
+        }
+
+        .expire{
+            color: #c62828;
+        }
+
+        .message {
+            font-family: sans-serif;
+            color: #2c3e50;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #0004ff;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: 'Montserrat', sans-serif;
+            font-size: medium;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Upload QR Code</h2>
+        </div>
+        <form method="post" enctype="multipart/form-data" action="{% url 'validate_qr' %}">
+            {% csrf_token %}
+            <input type="file" id="fileInput" name="qr-image">
+            <label for="fileInput">
+                <span class="button-text">Choose File</span>
+                <div class="fill-container"></div>
+            </label><br><br>
+            <div class="file-name" id="fileName"></div>
+            <button type="submit">
+                <span class="button-text">Validate Pass</span>
+                <div class="fill-container"></div>
+            </button>
+        </form>
+        {% if status == 0 %}
+        <p class="message" style="color: #c62828;">Sorry! Your visitor pass has expired.</p>
+        {% elif status == 1 %}
+        <p class="message" style="color: #0b8043;">Your visitor pass is active.</p>
+        <a href="{% url 'validate_qr' %}">View pass >></a>
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function() {
+            var fileName = this.files[0].name;
+            document.getElementById('fileName').textContent = fileName;
+        });
+    </script>
+</body>
+</html>

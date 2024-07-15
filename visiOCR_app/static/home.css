@@ -1,0 +1,51 @@
+body {
+    background-color: bisque;
+}
+
+h1 {
+    color:rgb(197, 35, 35);
+    font-family:sans-serif;
+    margin-bottom: 40px;
+}
+
+.ocr {
+    background-color: #8ebef9;
+    width: 38%;
+    height: 20%;
+    margin-left: 28%;
+    padding: 10px 8px;
+    text-align: center;
+    border-radius: 15px;
+}
+
+.styled-input {
+    padding: 10px;
+    border-radius: 25px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.5);
+    width: 60%;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+p {
+   font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+   font-size: 16px;
+}
+
+button {
+    background-color:#00fc72;
+    width: 50%;
+    margin-top: 5px;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    border: solid rgb(68, 82, 143);
+    border-radius: 10px;
+    font-size: medium;
+}
+
+button:hover {
+    background-color: rgb(136, 87, 159);
+    color:aliceblue;
+    cursor: pointer;
+}

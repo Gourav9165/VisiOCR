@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>DetailsPage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% load static %}
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e8eaf6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: linear-gradient(135deg, #ffffff, #b7b5b529);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            background: linear-gradient(135deg, #a6cdf457, #91b9dc);
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-radius: 20px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 20px;
+            font-family: sans-serif;
+            color: #2c3e50;
+        }
+
+        .details {
+            font-size: medium;
+            margin-bottom: 10px;
+        }
+
+        .qrcode {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .qrcode img {
+            width: 40%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            position: relative;
+            padding: 10px 50px;
+            border-radius: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #2c3e50;
+            border: solid 1px #5198bb;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        button .button-text {
+            position: relative;
+            z-index: 2;
+        }
+
+        button .fill-container {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            padding-bottom: 100%;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        button .fill-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #63c0ee;
+            border-radius: 50%;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(-100%);
+        }
+
+        button:hover {
+            border-color: #63c0ee;
+        }
+
+        button:hover .fill-container {
+            transform: translateY(-50%) rotate(0);
+        }
+
+        button:hover .fill-container::after {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="content">
+        <div class="header">
+            <h2>Visitor Pass Information</h2>
+        </div>
+        <ul>
+            {% for key, value in extracted_info.items %}
+            <li class="details"><strong>{{ key }}:</strong> {{ value }}</li>
+            {% endfor %}
+        </ul>
+        <div class="qrcode">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+            <form method="post" action="{% url 'download_pdf' %}">
+                {% csrf_token %}
+                <input type="hidden" name="extracted_info" value="{{ extracted_info }}">
+                <input type="hidden" name="qr_code" value="data:image/png;base64,{{ qr_code }}">
+                <button type="submit">
+                    <span class="button-text">Download as PDF</span>
+                    <div class="fill-container"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
