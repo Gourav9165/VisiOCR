@@ -103,17 +103,17 @@ VisiOCR is a Django-based application that processes uploaded images to extract 
 
 ## Output 📸
 
-![Home Page](./outputs/1.png)
+![Home Page](outputs/1.png)
 
-![Create_Pass](./outputs/2.png)
+![Create_Pass](outputs/2.png)
 
-![Pass_info](./outputs/3.png)
+![Pass_info](outputs/3.png)
 
-![Validation](./outputs/4.png)
+![Validation](outputs/4.png)
 
-![Active_Pass](./outputs/5.png)
+![Active_Pass](outputs/5.png)
 
-![PDF](./outputs/6.png)
+![PDF](outputs/6.png)
 
 
 ## Project Structure 🗂️
