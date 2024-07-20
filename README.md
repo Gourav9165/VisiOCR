@@ -1,6 +1,6 @@
-# VisiOCR 
+# VisiCheck 
 
-VisiOCR is a Django-based application that processes uploaded images to extract text information (such as name, date of birth, PAN number, and Aadhaar number), generates a QR code for the extracted information, and allows users to download this information in PDF format.
+VisiCheck is a Django-based application that processes uploaded images to extract text information (such as name, date of birth, PAN number, and Aadhaar number), generates a QR code for the extracted information, and allows users to download this information in PDF format.
 
 ## Features 
 
