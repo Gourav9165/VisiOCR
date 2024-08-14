@@ -32,6 +32,60 @@ def preprocess(image):
     # _, binary = cv2.threshold(gray_image, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return gray_image
 
+        
+def extractText(request):
+    if(request.method == 'POST'):
+        card_type = request.POST.get('Card')
+        image_file = request.FILES["image"]
+        visitor_name = request.POST.get('visitor_name')
+        date_of_visiting = request.POST.get('date_of_visiting')
+        duration_of_visiting = request.POST.get('duration_of_visiting')
+        
+        image_path = os.path.join(settings.MEDIA_ROOT, image_file.name)
+        with open(image_path, 'wb+') as destination:
+            for chunk in image_file.chunks():
+                destination.write(chunk)
+        
+        image = cv2.imread(image_path)
+        processed = preprocess(image)
+
+        try:
+            extracted_text = pytesseract.image_to_string(processed)
+            print("Extracted Text:")
+            print(extracted_text)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        
+        if(card_type == 'Aadhar'):
+            extracted_info = aadhar.extract_info(extracted_text)
+        elif(card_type == 'Pan'):
+            extracted_info = pan.extract_info(extracted_text)
+ 
+        qr_code = generateQR(extracted_info, date_of_visiting, duration_of_visiting)
+
+        if 'Date of Birth' in extracted_info.keys():
+            x = extracted_info['Date of Birth'].split('/')
+            formatted_dob = datetime(int(x[2]), int(x[1]), int(x[0]))
+        else:
+            formatted_dob = None
+
+        try:
+            OCR_store.objects.create( Name=extracted_info['Name'], Father_name=extracted_info['Father_name'], 
+                                       Gender=extracted_info['Gender'] if 'Gender' in extracted_info.keys() else None, 
+                                        DOB=formatted_dob, 
+                                        Pan_no=extracted_info['Pan No'] if 'Pan No' in extracted_info.keys() else None,
+                                        Aadhaar_no=extracted_info['Aadhaar No'] if 'Aadhaar No' in extracted_info.keys() else None,
+                                        Phone_no=extracted_info['Phone No'] if 'Phone No' in extracted_info.keys() else None,
+                                        Expiry_time=extracted_info['Expiry time'] )
+        except:
+            print("Data unable to insert..")
+    
+        return render(request, 'info.html', {'extracted_info': extracted_info, 'qr_code': qr_code})
+    
+    return render(request, 'upload.html')
+
+
+
 def generateQR(data, time, duration):
     try:
         formatted_time = datetime.strptime(time, '%Y-%m-%dT%H:%M')
@@ -54,55 +108,7 @@ def generateQR(data, time, duration):
     except Exception as e:
         print("Failed to create QR code: %s", e)
 
-def checkStatus(request):
-    return render(request, 'validate_qr.html', {'status': -1})
 
-def validateQR(request):
-    if request.method == 'POST':
-            image = request.FILES['qr-image']
-            img = cv2.imdecode(np.frombuffer(image.read(), np.uint8), cv2.IMREAD_COLOR)
-
-            # Decode the QR code
-            decoded_objects = decode(img)
-            data = None
-            for obj in decoded_objects:
-                data = obj.data.decode('utf-8')
-
-            if data:
-                data = data.replace("'", "\"")
-                converted_data = json.loads(data)
-
-                expiry_time = converted_data['Expiry time']
-                time = datetime.strptime(expiry_time, "%Y-%m-%d %H:%M:%S")
-                current_time = datetime.now()
-                if(current_time < time):
-                   flag = 1
-                   pil_img = Image.fromarray(img)
-                   buffered = BytesIO()
-                   pil_img.save(buffered, format="PNG")
-                   img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-                   converted_data["Image url"] = img_str 
-
-                   with open('temp.json', 'w') as fp:
-                     json.dump(converted_data, fp)
-                else:
-                    flag = 0
-
-                return render(request, 'validate_qr.html', {'status': flag})
-            else:
-                return HttpResponse("No QR code found.")
-            
-    f = open('temp.json')
-    data = json.load(f)
-    f.close()
-    img_str = data['Image url']
-    del data['Image url']
-    return render(request, 'info.html', {'extracted_info': data, 'qr_code': img_str})
-
-
-
-def draw_rounded_rect(canvas, x, y, width, height, radius, fill=1):
-    canvas.roundRect(x, y, width, height, radius, fill=fill)
 
 def downloadPDF(request):
     if request.method == 'POST':
@@ -176,54 +182,94 @@ def downloadPDF(request):
         response.write(pdf)
         return response
 
-        
-def extractText(request):
-    if(request.method == 'POST'):
-        card_type = request.POST.get('Card')
-        image_file = request.FILES["image"]
-        visitor_name = request.POST.get('visitor_name')
-        date_of_visiting = request.POST.get('date_of_visiting')
-        duration_of_visiting = request.POST.get('duration_of_visiting')
-        
-        image_path = os.path.join(settings.MEDIA_ROOT, image_file.name)
-        with open(image_path, 'wb+') as destination:
-            for chunk in image_file.chunks():
-                destination.write(chunk)
-        
-        image = cv2.imread(image_path)
-        processed = preprocess(image)
 
-        try:
-            extracted_text = pytesseract.image_to_string(processed)
-            print("Extracted Text:")
-            print(extracted_text)
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        
-        if(card_type == 'Aadhar'):
-            extracted_info = aadhar.extract_info(extracted_text)
-        elif(card_type == 'Pan'):
-            extracted_info = pan.extract_info(extracted_text)
- 
-        qr_code = generateQR(extracted_info, date_of_visiting, duration_of_visiting)
 
-        if 'Date of Birth' in extracted_info.keys():
-            x = extracted_info['Date of Birth'].split('/')
-            formatted_dob = datetime(int(x[2]), int(x[1]), int(x[0]))
-        else:
-            formatted_dob = None
 
-        try:
-            OCR_store.objects.create( Name=extracted_info['Name'], Father_name=extracted_info['Father_name'], 
-                                       Gender=extracted_info['Gender'] if 'Gender' in extracted_info.keys() else None, 
-                                        DOB=formatted_dob, 
-                                        Pan_no=extracted_info['Pan No'] if 'Pan No' in extracted_info.keys() else None,
-                                        Aadhaar_no=extracted_info['Aadhaar No'] if 'Aadhaar No' in extracted_info.keys() else None,
-                                        Phone_no=extracted_info['Phone No'] if 'Phone No' in extracted_info.keys() else None,
-                                        Expiry_time=extracted_info['Expiry time'] )
-        except:
-            print("Data unable to insert..")
-    
-        return render(request, 'info.html', {'extracted_info': extracted_info, 'qr_code': qr_code})
-    
-    return render(request, 'upload.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def checkStatus(request):
+    return render(request, 'validate_qr.html', {'status': -1})
+
+def validateQR(request):
+    if request.method == 'POST':
+            image = request.FILES['qr-image']
+            img = cv2.imdecode(np.frombuffer(image.read(), np.uint8), cv2.IMREAD_COLOR)
+
+            # Decode the QR code
+            decoded_objects = decode(img)
+            data = None
+            for obj in decoded_objects:
+                data = obj.data.decode('utf-8')
+
+            if data:
+                data = data.replace("'", "\"")
+                converted_data = json.loads(data)
+
+                expiry_time = converted_data['Expiry time']
+                time = datetime.strptime(expiry_time, "%Y-%m-%d %H:%M:%S")
+                current_time = datetime.now()
+                if(current_time < time):
+                   flag = 1
+                   pil_img = Image.fromarray(img)
+                   buffered = BytesIO()
+                   pil_img.save(buffered, format="PNG")
+                   img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                   converted_data["Image url"] = img_str 
+
+                   with open('temp.json', 'w') as fp:
+                     json.dump(converted_data, fp)
+                else:
+                    flag = 0
+
+                return render(request, 'validate_qr.html', {'status': flag})
+            else:
+                return HttpResponse("No QR code found.")
+            
+    f = open('temp.json')
+    data = json.load(f)
+    f.close()
+    img_str = data['Image url']
+    del data['Image url']
+    return render(request, 'info.html', {'extracted_info': data, 'qr_code': img_str})
+
+
+
+def draw_rounded_rect(canvas, x, y, width, height, radius, fill=1):
+    canvas.roundRect(x, y, width, height, radius, fill=fill)

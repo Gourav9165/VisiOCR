@@ -140,6 +140,9 @@
             <li class="details"><strong>{{ key }}:</strong> {{ value }}</li>
             {% endfor %}
         </ul>
+
+
+        
         <div class="qrcode">
             <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
             <form method="post" action="{% url 'download_pdf' %}">
